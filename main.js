@@ -1,34 +1,59 @@
 import chalk from 'chalk'
 import fp from 'lodash/fp.js'
-import { drivers } from './data/data.js'
-import { getScores } from "./scores.js"
+
+import { getScores, calculateTeamScores } from "./common/scores.js"
+import { getPossibleTeams, } from './common/selections.js'
+
+
+const positions = {
+    race:  [
+        'HAM', 'BOT', 
+        'VER', 'PER', 
+        'RIC', 'NOR', 
+        'LEC', 'SAI',
+        'VET', 'STR', 
+        'ALO', 'OCO', 
+        'GAS', 'TSU', 
+        'RAI', 'GIO', 
+        'RUS', 'LAT', 
+        'MSC', 'MAZ'
+        ],
+    quali: [
+        'HAM', 'BOT', 
+        'VER', 'PER', 
+        'SAI', 'VET', 
+        'ALO', 'RIC',
+        'NOR', 'STR', 
+        'LEC', 'OCO', 
+        'GAS', 'TSU', 
+        'RAI', 'GIO', 
+        'MSC', 'LAT', 
+        'MAZ', 'RUS'
+    ]
+}
+
+
+const TD = 'PER';
 
 
 
-const positions = [
-    'HAM', 'BOT', 
-    'VER', 'PER', 
-    'RIC', 'NOR', 
-    'LEC', 'SAI',
-    'VET', 'STR', 
-    'ALO', 'OCO', 
-    'GAS', 'TSU', 
-    'RAI', 'GIO', 
-    'RUS', 'LAT', 
-    'MSC', 'MAZ'
-]
+(_ => {
+    const scores = getScores(TD)(positions)
+    const teams = getPossibleTeams(100)
+    const teamScores = calculateTeamScores(scores)(teams)
 
-const TD = 'PER'
+    fp.pipe(
+        fp.orderBy('points')('desc'),
+        fp.slice(0)(10),
+        fp.each((ts, i) => {
+            console.log(`----------- TEAM ${i + 1} ----------- `)
+            console.log('Points:', ts.points)
+            console.log('Cost:', ts.cost)
+            console.log('Team:', ts.team.map(fp.get('id')))
+        })
+    )(teamScores)
+})()
 
-
-
-fp.pipe(
-    fp.map(driverCode => drivers.find(({ id }) => id === driverCode)),
-    getScores(TD),
-    fp.each(([driver, score]) => console.log(
-        chalk.yellow(driver.id), ':', chalk.green(score))
-    )
-)(positions)
 
 
 
