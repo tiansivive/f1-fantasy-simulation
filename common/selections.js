@@ -23,9 +23,9 @@ const calculateDriverCombos = (combinations = [], i) => {
     return calculateDriverCombos(combinations, i - 1)
 }
 
+const combos = calculateDriverCombos([ drivers.slice(0, TEAM_SIZE) ], TEAM_SIZE -1)
 export const getPossibleTeams = budget => fp.pipe(
-    () => calculateDriverCombos([ drivers.slice(0, TEAM_SIZE) ], TEAM_SIZE -1),
     fp.flatMap(team => constructors.map(c => [...team, c])),
     fp.filter(team => calculatePrice(team) <= budget)
-)()
+)(combos)
 

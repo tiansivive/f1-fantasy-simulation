@@ -1,7 +1,7 @@
 
 
 import fp from 'lodash/fp.js'
-import { points, driverToTeamMap } from '../data/data.js'
+import { points, driverToTeamMap, constructors, drivers } from '../data/data.js'
 import { calculatePrice } from './selections.js'
 
 
@@ -19,14 +19,15 @@ const awardPoints = points => fp.pipe(
 const awardRacePoints = awardPoints(points.race) 
 const awardQualiPoints = awardPoints(points.quali) 
 
-export const qualiBonus = position => 
+const raceCompletionBonus = () => 1
+const qualiBonus = position => 
     position < 11 
         ? 3
         : position < 16
             ? 2
             : 1
 
-export const positionChangeBonus = (racePos, qualiPositions, driver) => {
+const positionChangeBonus = (racePos, qualiPositions, driver) => {
     const qualiPos = qualiPositions.findIndex(d => d === driver)
     const placesGained = Math.min(5, qualiPos - racePos)
 
@@ -35,9 +36,15 @@ export const positionChangeBonus = (racePos, qualiPositions, driver) => {
 
     // lost places, penalty bonus is doubled if starting inside top 10
     return qualiPos < 11 ? placesGained * 2 : placesGained
-}           
+}          
 
-export const raceCompletionBonus = () => 1
+const beatTeammate = (driver, positions) => {
+   const teammate = drivers.findIndex(d => driverToTeamMap[d] === driverToTeamMap[driver] && d !== driver)
+   const pos = positions.find(d => driver === d)
+   const teammatePos = positions.find(d => teammate === d)
+   return pos > teammatePos
+}
+
 
 const awardMultipliers = (TD, MD) => fp.map(([ driver, points]) => 
     TD === driver
@@ -59,17 +66,23 @@ export const getScores = (TD, MD) => positions => {
 
     
     return {
-        drivers: awardMultipliers(TD)(driverTotals),
+        drivers: awardMultipliers(TD)(driverTotals.map(([driver, score]) => {
+            const raceBonus = beatTeammate(driver, positions.race) ? 3 : 0
+            const qualiBonus = beatTeammate(driver, positions.quali) ? 2 : 0
+            return [driver, score + raceBonus + qualiBonus]
+        })),
         constructors: constructorTotals
     }
 }
 
 
-export const calculateTeamScores = scores => fp.map(team => ({
+export const calculateTeamScores = (scores, grid) => fp.map.convert({cap: false})((team, i) => ({
+    id: '#' + i + 1,
     team,
+    grid,
     cost: calculatePrice(team),
     points: team.reduce((sum, { id }) => {
         const [, score] = scores.drivers.find(([d]) => d === id ) || scores.constructors.find(([c]) => c === id)
         return sum + score
-     }, 0)
+    }, 0)
 }))

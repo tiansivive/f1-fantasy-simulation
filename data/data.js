@@ -179,6 +179,45 @@ export const driverToTeamMap = {
     LAT: 'WIL',
 }
 
+export const pace = {
+    constructors: {
+        MER: 0.0,
+        RBR: 0.1,
+        MCL: 0.3,
+        FER: 0.45,
+        TAU: 0.65,
+        AMC: 0.7,
+        ALP: 0.75,
+        ALF: 1.0,
+        WIL: 1.2,
+        HAS: 1.5
+    },
+    drivers: {
+        HAM: 0,
+        BOT: 0.2,
+        VER: 0,
+        PER: 0.2,
+        RIC: 0.1,
+        NOR: 0.3,
+        LEC: 0.1,
+        SAI: 0.2,
+        VET: 0.3,
+        STR: 0.4,
+        GAS: 0.25,
+        TSU: 0.4,
+        ALO: 0.3,
+        OCO: 0.35,
+        RAI: 0.4,
+        GIO: 0.5,
+        MSC: 0.6,
+        MAZ: 0.7,
+        RUS: 0.3,
+        LAT: 0.4
+    }
+    
+}
+
+
 export const prices = {
     HAM: 33.5,
     BOT: 23.6,
