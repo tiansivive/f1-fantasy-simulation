@@ -8,18 +8,23 @@ import { generate} from './common/positions.js'
 
 
 (_ => {
-    const TD = 'PER';
-    const budget = 100
-    const iterations = 100
+
+
+    const options = process.argv
+        .filter(arg => arg.startsWith('--'))
+        .map(arg => arg.slice(2).split('='))
+        .reduce((config, [arg, val]) => ({
+            ...config, 
+            [arg]: Number.isNaN(parseFloat(val)) ? val : parseFloat(val)
+    }), {})
+
+    console.log('Options:', options)
+
+    const { TD, budget = 100, iterations = 100 } = options
     const teams = getPossibleTeams(budget)
-    // const scores = getScores(TD)(positions)
-    // const teamScores = calculateTeamScores(scores)(teams)
-
     const calculateScores = getScores(TD)
-
     const quali = fp.range(0, iterations).map(generate)
     const race = fp.range(0, iterations).map(generate)
-
     const scores = fp.zipWith(
         (quali, race) => fp.pipe(
             calculateTeamScores(calculateScores({ race, quali }), { race, quali } ),
